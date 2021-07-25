@@ -12,6 +12,8 @@ Flask = "*"
 "Jinja2" = "*"
 MarkupSafe = "*"
 Werkzeug = "*"
+mysql-connector-python = "*"
+twitterapi = "*"
 
 [dev-packages]
 

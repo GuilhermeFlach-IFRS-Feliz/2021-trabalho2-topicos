@@ -5,6 +5,19 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import json
+import mysql.connector
+import time
+import threading
+from datetime import datetime
+from TwitterAPI import TwitterAPI
+from pprint import pprint
+
+mydb = mysql.connector.connect(
+  host="localhost",
+  user="root",
+  password="",
+  database="topicos"
+)
 
 app = Flask(__name__)
 
@@ -105,6 +118,12 @@ def callback():
     real_oauth_token_secret = access_token[b'oauth_token_secret'].decode(
         'utf-8')
 
+    cursor = mydb.cursor()
+
+    cursor.execute("INSERT IGNORE INTO usuarios (id, oauth_token, oauth_token_secret) VALUES (%s, %s, %s)", (user_id, real_oauth_token, real_oauth_token_secret))
+
+    mydb.commit()
+
     # Call api.twitter.com/1.1/users/show.json?user_id={user_id}
     real_token = oauth.Token(real_oauth_token, real_oauth_token_secret)
     real_client = oauth.Client(consumer, real_token)
@@ -134,6 +153,49 @@ def callback():
 def internal_server_error(e):
     return render_template('error.html', error_message='uncaught exception'), 500
 
-  
+def sched():
+    while True:
+        cursor = mydb.cursor()
+
+        cursor.execute("SELECT * FROM usuarios")
+        usuarios = cursor.fetchall()
+       
+        
+        for usuario in usuarios:
+            uid = usuario[0]
+            oath_token = usuario[1]
+            oath_secret = usuario[2]
+
+            api = TwitterAPI(app.config['APP_CONSUMER_KEY'], app.config['APP_CONSUMER_SECRET'], oath_token, oath_secret, api_version="2")
+
+            today = str(datetime.date(datetime.now()))
+            today += "T00:00:00Z"
+
+            params = {'tweet.fields': 'non_public_metrics,organic_metrics', "max_results": 5}
+            tweets = api.request(f'users/:{uid}/tweets', params)
+            print(tweets.text)
+            print(tweets.status_code)
+            for t in tweets:
+                pprint(t)
+            
+            # t = api.request(f"tweets/:{1419323107756675076}", {'tweet.fields': 'non_public_metrics,organic_metrics'})
+
+            # pprint(t.text)
+
+            
+
+           
+
+        time.sleep(100000)
+
+t1 = threading.Thread(target=app.run)
+t2 = threading.Thread(target=sched)
 if __name__ == '__main__':
-    app.run()
+    t1.start()
+    t2.start()
+    
+    
+
+
+
+
