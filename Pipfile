@@ -14,6 +14,8 @@ MarkupSafe = "*"
 Werkzeug = "*"
 mysql-connector-python = "*"
 twitterapi = "*"
+schedule = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

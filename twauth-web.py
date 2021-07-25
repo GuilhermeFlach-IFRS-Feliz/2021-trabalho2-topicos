@@ -8,9 +8,15 @@ import json
 import mysql.connector
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from TwitterAPI import TwitterAPI
 from pprint import pprint
+import schedule
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 mydb = mysql.connector.connect(
   host="localhost",
@@ -33,6 +39,13 @@ app.config['APP_CONSUMER_KEY'] = os.getenv(
     'TWAUTH_APP_CONSUMER_KEY', 'API_Key_from_Twitter')
 app.config['APP_CONSUMER_SECRET'] = os.getenv(
     'TWAUTH_APP_CONSUMER_SECRET', 'API_Secret_from_Twitter')
+
+app.config['ACCESS_TOKEN_BOT'] = os.getenv(
+    'TWAUTH_APP_TOKEN_BOT', 'API_Key_from_Twitter')
+app.config['ACCESS_SECRET_BOT'] = os.getenv(
+    'TWAUTH_APP_SECRET_BOT', 'API_Key_from_Twitter')
+
+print(app.config['ACCESS_TOKEN_BOT'], app.config['ACCESS_SECRET_BOT'])
 
 # alternatively, add your key and secret to config.cfg
 # config.cfg should look like:
@@ -153,8 +166,7 @@ def callback():
 def internal_server_error(e):
     return render_template('error.html', error_message='uncaught exception'), 500
 
-def sched():
-    while True:
+def job():
         cursor = mydb.cursor()
 
         cursor.execute("SELECT * FROM usuarios")
@@ -168,31 +180,55 @@ def sched():
 
             api = TwitterAPI(app.config['APP_CONSUMER_KEY'], app.config['APP_CONSUMER_SECRET'], oath_token, oath_secret, api_version="2")
 
-            today = str(datetime.date(datetime.now()))
-            today += "T00:00:00Z"
+            date = str(datetime.date(datetime.now()) - timedelta(days=7))
+            date += "T00:00:00Z"
 
-            params = {'tweet.fields': 'non_public_metrics,organic_metrics', "max_results": 5}
+            params = {'tweet.fields': 'organic_metrics', "start_time": date, "user.fields": "username,name"}
             tweets = api.request(f'users/:{uid}/tweets', params)
-            print(tweets.text)
-            print(tweets.status_code)
+            
+            text = ""
+            hasTweets = False
             for t in tweets:
-                pprint(t)
-            
-            # t = api.request(f"tweets/:{1419323107756675076}", {'tweet.fields': 'non_public_metrics,organic_metrics'})
+                hasTweets = True
+                text+=str(t)+"\n\n"
 
-            # pprint(t.text)
+            if (not hasTweets):
+                continue
 
-            
+            api = TwitterAPI(app.config['APP_CONSUMER_KEY'], app.config['APP_CONSUMER_SECRET'], app.config['ACCESS_TOKEN_BOT'], app.config['ACCESS_SECRET_BOT'])
 
-           
+            event = {
+	        "event": {
+		        "type": "message_create",
+		        "message_create": {
+			        "target": {
+				        "recipient_id": uid
+			        },
+			        "message_data": {
+				        "text": text
+			            }
+		            }
+	            }
+            }
+            response = api.request("direct_messages/events/new", json.dumps(event))
+            print(response.text)
 
-        time.sleep(100000)
+
+def sched():
+    
+
+    schedule.every().saturday.at("12:00").do(job)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
 
 t1 = threading.Thread(target=app.run)
 t2 = threading.Thread(target=sched)
 if __name__ == '__main__':
     t1.start()
     t2.start()
+    job()
     
     
 
