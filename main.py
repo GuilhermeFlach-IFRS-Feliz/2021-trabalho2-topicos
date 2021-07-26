@@ -196,6 +196,10 @@ def job():
             dict_str = content.decode("UTF-8")
             responseData_dict = ast.literal_eval(dict_str)
             
+            # Verificar se houveram tweets no período de tempo
+            if "data" not in responseData_dict:
+                continue
+
             tweet_list = responseData_dict['data']
             user_info = responseData_dict['includes']['users'][0]
 
@@ -212,12 +216,7 @@ def job():
             reply_total = 0
             user_profile_clicks_total = 0
 
-            # Iterar pelos tweets e fazer a soma das informações
-
-            # Verificar se houveram no período de tempo
-            if not tweet_list:
-                continue            
-
+            # Iterar pelos tweets e fazer a soma das informações        
             for tweet in tweet_list:
                 tweet_total += 1
 
