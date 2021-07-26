@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 from TwitterAPI import TwitterAPI
 from pprint import pprint
 import schedule
+import ast
+
+
 
 from dotenv import load_dotenv
 
@@ -172,7 +175,7 @@ def job():
         cursor.execute("SELECT * FROM usuarios")
         usuarios = cursor.fetchall()
        
-        
+        # Iterar pelos usuários do banco e requisitar as informações deles 
         for usuario in usuarios:
             uid = usuario[0]
             oath_token = usuario[1]
@@ -183,17 +186,57 @@ def job():
             date = str(datetime.date(datetime.now()) - timedelta(days=7))
             date += "T00:00:00Z"
 
-            params = {'tweet.fields': 'organic_metrics', "start_time": date, "user.fields": "username,name"}
+            # Fazer a requisição e armazenar a resposta
+            params = {'expansions':'author_id', 'tweet.fields': 'organic_metrics', 'start_time': date, 'user.fields' : 'name'}
             tweets = api.request(f'users/:{uid}/tweets', params)
-            
-            text = ""
-            hasTweets = False
-            for t in tweets:
-                hasTweets = True
-                text+=str(t)+"\n\n"
 
-            if (not hasTweets):
-                continue
+
+            # Converter as informações de bytes para dicionarios
+            content = tweets.response.content
+            dict_str = content.decode("UTF-8")
+            responseData_dict = ast.literal_eval(dict_str)
+            
+            tweet_list = responseData_dict['data']
+            user_info = responseData_dict['includes']['users'][0]
+
+            # Pegar informacoes do usuário
+            user_name = user_info['name']
+            user_at = user_info['username']
+
+
+            # Pegar informações dos tweets
+            tweet_total = 0
+            impression_total = 0
+            retweet_total = 0
+            like_total = 0
+            reply_total = 0
+            user_profile_clicks_total = 0
+
+            # Iterar pelos tweets e fazer a soma das informações
+
+            # Verificar se houveram no período de tempo
+            if not tweet_list:
+                continue            
+
+            for tweet in tweet_list:
+                tweet_total += 1
+
+                tweet_info = tweet['organic_metrics']
+                impression_total += tweet_info['impression_count']
+                retweet_total += tweet_info['retweet_count']
+                like_total += tweet_info['like_count']
+                reply_total += tweet_info['reply_count']
+                user_profile_clicks_total += tweet_info['user_profile_clicks']
+
+            # Calcular as Médias
+            impression_avg = impression_total / tweet_total
+            retweet_avg = retweet_total / tweet_total
+            like_avg = like_total / tweet_total 
+            reply_avg = reply_total / tweet_total 
+            user_profile_clicks_avg = user_profile_clicks_total / tweet_total 
+
+            # Construir a mensagem
+            text = f"Olá {user_name} (@{user_at}). Nessa última semana os seus {tweet_total} tweets tiveram uma média de {impression_avg} visualizações, {like_avg} likes e {retweet_avg} retweets! Adicionalmente, as pessoas responderam, em média, {reply_avg} vezes aos seus tweets e clickaram no seu perfil {user_profile_clicks_avg} vezes (a partir de seus tweets)."
 
             api = TwitterAPI(app.config['APP_CONSUMER_KEY'], app.config['APP_CONSUMER_SECRET'], app.config['ACCESS_TOKEN_BOT'], app.config['ACCESS_SECRET_BOT'])
 
@@ -215,8 +258,6 @@ def job():
 
 
 def sched():
-    
-
     schedule.every().saturday.at("12:00").do(job)
 
     while True:
@@ -228,7 +269,6 @@ t2 = threading.Thread(target=sched)
 if __name__ == '__main__':
     t1.start()
     t2.start()
-    job()
     
     
 

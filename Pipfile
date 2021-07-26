@@ -16,6 +16,7 @@ mysql-connector-python = "*"
 twitterapi = "*"
 schedule = "*"
 python-dotenv = "*"
+colorama = "*"
 
 [dev-packages]
 
