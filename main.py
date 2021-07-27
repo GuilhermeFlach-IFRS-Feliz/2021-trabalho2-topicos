@@ -190,6 +190,13 @@ def job():
             params = {'expansions':'author_id', 'tweet.fields': 'organic_metrics', 'start_time': date, 'user.fields' : 'name'}
             tweets = api.request(f'users/:{uid}/tweets', params)
 
+            # Verificar se o usuário revogou acesso
+            if (tweets.status_code == 401):
+                # Remover usuário da tabela
+                cursor = mydb.cursor()
+                cursor.execute("DELETE FROM usuarios WHERE id=%s", (uid,))
+                mydb.commit()
+                continue
 
             # Converter as informações de bytes para dicionarios
             content = tweets.response.content
