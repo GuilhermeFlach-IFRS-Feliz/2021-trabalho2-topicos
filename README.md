@@ -6,7 +6,7 @@ Bot de Twitter que te ajuda a entender o seu alcance.
 
 ## Setup
 
-1. Setar as variáveis de ambiente com as credencias do Twitter:
+1. Setar as variáveis de ambiente com as credenciais do Twitter:
 
 - TWAUTH_APP_CONSUMER_KEY
 - TWAUTH_APP_CONSUMER_SECRET
@@ -19,4 +19,4 @@ Bot de Twitter que te ajuda a entender o seu alcance.
 3. Rodar:
    1. `python3 ./main.py`;
 
-O callback URL do app deve ser /callback, caso contrário mudar no códido
+O callback URL do app deve ser /callback, caso contrário mudar no código
