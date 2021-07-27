@@ -4,14 +4,68 @@
     <title>Reach Bot {% block title %}{% endblock %}</title>
     <link
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-    />
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+    <!-- Desculpa a todos os programadores, o arquivo de css não estava funcionando -->
+    <style>
+      body {
+          background-color: rgb(61, 64, 66);
+          color: #ffff;
+          font-size: 3.8vw;
+      }
+
+      .content {
+        min-height: 70vh;
+      }
+
+      .btn-wrapper {
+        width: 100%;
+
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .btn.btn-primary {
+        font-size: 1.2em;
+        border-radius: 1rem;
+
+        margin-top: 45px;
+      }
+
+      @media (min-width: 1000px) {
+          
+          body {
+              font-size: 25px;
+          }
+
+          .content {
+            min-height: 70vh;
+          }
+
+          .btn-wrapper {
+            display: inline;
+          }
+
+          .btn.btn-primary {
+            font-size: 1.2rem;
+            border-radius: 0.6rem;
+            margin-top: 10px;
+
+          }
+          
+      }
+    </style>
+
   </head>
 
-  <body style="background-color: rgba(21, 32, 43, 1); color: #ffff">
+  <body>
     <div class="container">
       <h1>Reach Bot</h1>
-      {% block containercontent %}{% endblock %}
+      <div class="content">
+        {% block containercontent %}{% endblock %}
+      </div>
       <hr style="" />
       <div class="footer">
         <p class="text-muted">
