@@ -1,23 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+  <head>
+    <title>Reach Bot {% block title %}{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    />
+  </head>
 
-<head>
-	<title>twauth-web sample app {% block title %}{% endblock %}</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-</head>
-
-<body>
-	<div class="container">
-		<h1>twauth-web</h1>
-		{% block containercontent %}{% endblock %}
-		<hr>
-		<div class="footer">
-			<p class="text-muted"><small>This is a basic demo created by the <a href="https://twitter.com/TwitterDev">@TwitterDev</a>
-					team. It is written in Python, using <a href="http://flask.pocoo.org/">Flask</a>
-					and <a href="https://github.com/simplegeo/python-oauth2">python-oauth2</a>. Basic CSS is provided by <a href="http://getbootstrap.com/">Bootstrap</a>.
-					The source code for this project can be found at <a href="https://github.com/twitterdev/twauth-web">github/twitterdev/twauth-web</a>.</small></p>
-		</div>
-	</div>
-</body>
-
+  <body style="background-color: rgba(21, 32, 43, 1); color: #ffff">
+    <div class="container">
+      <h1>Reach Bot</h1>
+      {% block containercontent %}{% endblock %}
+      <hr style="" />
+      <div class="footer">
+        <p class="text-muted">
+          <small>
+            Densenvolvido por tpdtop, CSS básico fornecido por
+            <a href="http://getbootstrap.com/">Bootstrap</a> Código fonte deste
+            projeto pode ser acessado em
+            <a
+              href="https://github.com/GuilhermeFlach-IFRS-Feliz/2021-trabalho2-topicos"
+              >https://github.com/GuilhermeFlach-IFRS-Feliz/2021-trabalho2-topicos</a
+            >.</small
+          >
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
